@@ -66,7 +66,7 @@ A full-featured Stripe payment module built with Laravel. This service provides 
 -   Store and retrieve transaction data using the `transactions` table.
 -   Add your own API endpoints in `routes/api.php` to expose payment functionality as needed.
 
-## Example: Creating a Payment Intent
+### Example: Creating a Payment Intent
 
 ```php
 use App\Helpers\PaymentHelper;
@@ -74,30 +74,56 @@ use App\Helpers\PaymentHelper;
 $paymentIntent = PaymentHelper::createPaymentIntent($amount, $customerId, $paymentMethodId, $email);
 ```
 
+### Example: Handling Payment via PaymentController
+
+You can create a controller (e.g., `PaymentController`) to handle payment requests using the helper methods. Here is a simplified example:
+
+```php
+// app/Http/Controllers/PaymentController.php
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Helpers\PaymentHelper;
+
+class PaymentController extends Controller
+{
+    public function addPayment(Request $request)
+    {
+        // Validate and process payment using PaymentHelper
+        $paymentIntent = PaymentHelper::createPaymentIntent(
+            $request->amount,
+            $request->customer_id,
+            $request->payment_method_id,
+            $request->email
+        );
+        // ... handle confirmation, capture, and response
+    }
+}
+```
+
+You can then define a route in `routes/api.php`:
+
+```php
+use App\Http\Controllers\PaymentController;
+
+Route::post('/payment', [PaymentController::class, 'addPayment']);
+```
+
+**Sample API Request:**
+
+```
+POST /api/payment
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "amount": 1000,
+  "customer_id": "cus_123...",
+  "payment_method_id": "pm_123...",
+  "email": "customer@example.com"
+}
+```
+
 ## Database: Transactions Table
 
-The `transactions` table stores payment and refund data, including:
-
--   user_id, package_id
--   payment_intent, payment_method
--   receipt_url, receipt_email
--   latest_charge, amount, tax
--   refund_id, balance_transaction, refunded_at
--   status, timestamps
-
-## Environment Variables
-
--   `STRIPE_SECRET`: Your Stripe secret key (required)
--   (Add other Stripe keys as needed for your integration)
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
-5. Create a new Pull Request
-
-## License
-
-This project is open-sourced
+The `transactions`
